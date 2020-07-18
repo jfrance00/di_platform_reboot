@@ -2,21 +2,19 @@
 
 basic structure: 
 Home Page (contains some welcome information/intro)
-|_ Basic info (location, what you will need)
-|_ Announcements (cancelations, up coming holidays that affect class, special events)
-|_ Courses
-   |_ Python
-   |  |_ Full time                                }
-   |  |  | weeks (lists all the weeks/topics)     } This structure repeats itself for all classes
-   |  |    |_ days (each day in the week          }
-   |  |
-   |  |_ Part time
-   | 
-   |_ JS
-   |  |_ Full time
-   |  |_ Part time
-   |
-   |_ Front end
+- Basic info (location, what you will need)
+- Announcements (cancelations, up coming holidays that affect class, special events)
+- Courses
+   - Python
+      - Full time                                  }
+          - weeks (lists all the weeks/topics)     } This structure repeats itself for all classes
+          - days (each day in the week             }
+      - Part time 
+   - JS
+      - Full time
+      - Part time
+   
+   - Front end
   
 
 Features
