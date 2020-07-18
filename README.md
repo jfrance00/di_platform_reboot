@@ -26,6 +26,6 @@ Features
         - flagged lessons
         - contact info
 - Social network widgets on footer
-- Admin update content (bonus feature)
+- Admin update content
 - Embedded coding (super bonus feature) -> just for python? Jupytor notebooks?
 - Portal for students to connect to other students (super super bonus)
