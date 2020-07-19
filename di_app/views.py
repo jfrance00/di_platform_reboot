@@ -73,4 +73,3 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
-
