@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import json
 from github import Github
 import flask
@@ -13,6 +14,7 @@ owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
 repo = u.get_repo("DI-Learning-Exercises")
+
 
 
 @app.route('/')
@@ -71,3 +73,4 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
+
