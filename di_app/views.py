@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import json
 from github import Github
 import flask
@@ -16,15 +15,15 @@ u = g.get_user()
 repo = u.get_repo("DI-Learning-Exercises")
 
 
-
 @app.route('/')
 def index():
     return flask.render_template('home.html')
 
 
-@app.route('/courses')
+@app.route('/courses')    #get rid of this page because of course menu item
 def courses():
     return flask.render_template('courses.html')
+
 
 
 @app.route('/test')
@@ -73,3 +72,23 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
+
+@app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
+def weeks():
+    return flask.render_template('weeks.html')
+
+
+@app.route('/course/weeknum/days')  #TODO course variable
+def days():
+    return flask.render_template('days.html')
+
+
+@app.route('/course/weeknum/daynum')  #TODO course variable and day #
+def lesson():
+    return flask.render_template('lesson.html')
+
+
+@app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
+def exercise():
+    return flask.render_template('exercise.html')
+

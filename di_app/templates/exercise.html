@@ -5,7 +5,16 @@
 
 {% block body %}
 
-breadcrumb bootstraps feature (like now)
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+    <li class="breadcrumb-item"><a href="#">Course(time)</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('days') }}">Days</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('days') }}">Lesson</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Exercise</li>
+  </ol>
+</nav>
+<h4> Here is a bunch of new info to learn! </h4>
 
 
 
