@@ -14,16 +14,19 @@
   </ol>
 </nav>
 
+
+{% for activity in course['lesson_activities'] %}
 <div class="card">
   <div class="card-header">
     lecture/exercise
   </div>
   <div class="card-body">
-    <h5 class="card-title">I'm a Title!</h5>
+    <h5 class="card-title">{{ activity }}</h5>
     <p class="card-text"> With some details about the material within :).</p>
     <a href= "{{ url_for('exercise') }}" class="btn btn-primary"> Exercise Deets</a>
   </div>
 </div>
+{% endfor %}
 
 
 {% endblock %}
