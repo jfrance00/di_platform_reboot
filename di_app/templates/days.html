@@ -5,8 +5,13 @@
 
 {% block body %}
 
-breadcrumb bootstraps feature (like now)
-
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+    <li class="breadcrumb-item"><a href="#">Course(time)</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Days</li>
+  </ol>
+</nav>
 
 <div class="card">
   <div class="card-header">
@@ -15,7 +20,7 @@ breadcrumb bootstraps feature (like now)
   <div class="card-body">
     <h5 class="card-title"> Day # </h5>
     <p class="card-text"> With some objectives for the lesson that day :).</p>
-    <a href="#" class="btn btn-primary"> Day # </a>
+    <a href="{{ url_for('lesson') }}" class="btn btn-primary"> Day # </a>
   </div>
 </div>
 

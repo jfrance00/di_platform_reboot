@@ -5,7 +5,15 @@
 
 {% block body %}
 
-breadcrumb bootstraps feature (like now)
+<!-- breadcrumb feature -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Course(time)</li>  <!-- course time will be variable from URL-->
+  </ol>
+</nav>
+
+<!-- end breadcrumb -->
 
 
 <div class="card" style="width: 18rem;">
@@ -13,8 +21,8 @@ breadcrumb bootstraps feature (like now)
     <h5 class="card-title"> Week # </h5>
     <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>
     <p class="card-text"> Here's some details about what we cover this week</p>
-    <a href="#" class="card-link"> Link to days page </a>
-    <a href="#" class="card-link">Another link</a>
+    <a href=" {{ url_for('days') }}" class="card-link"> Days in the Week </a>
+
   </div>
 </div>
 
