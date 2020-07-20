@@ -7,6 +7,11 @@ def index():
     return flask.render_template('home.html')
 
 
+@app.route('/profile')
+def profile():
+    return flask.render_template('profile.html')
+
+
 @app.route('/courses')    #get rid of this page because of course menu item
 def courses():
     return flask.render_template('courses.html')
