@@ -13,6 +13,8 @@
   </ol>
 </nav>
 
+
+{% for day in course['days_of_week'] %}
 <div class="card">
   <div class="card-header">
     lecture/exercise
@@ -23,6 +25,7 @@
     <a href="{{ url_for('lesson') }}" class="btn btn-primary"> Day # </a>
   </div>
 </div>
+{% endfor %}
 
 
 {% endblock %}

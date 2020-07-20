@@ -16,15 +16,16 @@
 <!-- end breadcrumb -->
 
 
+{% for week in course['length_in_weeks'] %}
 <div class="card" style="width: 18rem;">
   <div class="card-body">
     <h5 class="card-title"> Week # </h5>
     <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>
     <p class="card-text"> Here's some details about what we cover this week</p>
     <a href=" {{ url_for('days') }}" class="card-link"> Days in the Week </a>
-
   </div>
 </div>
+{% endfor %}
 
 
 {% endblock %}
