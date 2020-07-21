@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %} Weeks {% endblock %}
+
+
+{% block body %}
+
+<!-- breadcrumb feature -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">Course (Full/Part Time)</li>  <!-- course time will be variable from URL-->
+  </ol>
+</nav>
+
+<!-- end breadcrumb -->
+
+
+{% for week in course['length_in_weeks'] %}
+<div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title"> Week # </h5>
+    <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>
+    <p class="card-text"> Here's some details about what we cover this week</p>
+    <a href=" {{ url_for('days') }}" class="card-link"> Days in the Week </a>
+  </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}
