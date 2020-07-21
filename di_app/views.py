@@ -1,5 +1,6 @@
 import flask
-from . import app
+from . import forms, models
+from . import app, db
 
 
 @app.route('/')
@@ -12,10 +13,10 @@ def profile():
     return flask.render_template('profile.html')
 
 
-@app.route('/courses')    #get rid of this page because of course menu item
-def courses():
-    return flask.render_template('courses.html')
-
+@app.route('/login')
+def login():
+    form = forms.CreateUser()
+    return flask.render_template('login.html', form=form)
 
 @app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
 def weeks():
