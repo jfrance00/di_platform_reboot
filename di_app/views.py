@@ -7,6 +7,8 @@ import mistune
 import ast
 
 from . import app
+from . import forms, models
+from . import app, db
 
 token = ''  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
@@ -25,10 +27,10 @@ def profile():
     return flask.render_template('profile.html')
 
 
-@app.route('/courses')    #get rid of this page because of course menu item
-def courses():
-    return flask.render_template('courses.html')
-
+@app.route('/login')
+def login():
+    form = forms.CreateUser()
+    return flask.render_template('login.html', form=form)
 
 
 @app.route('/test')
