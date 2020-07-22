@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import flask
-from . import forms, models
-from . import app, db
-
-=======
 import json
 from github import Github
 import flask
@@ -12,17 +6,15 @@ import markdown
 import mistune
 import ast
 
-from . import app
-from . import forms, models
+from . import forms, models, create_user
 from . import app, db
 
-token = ''  # here comes token!! need to understand how to keep it secured and still online
-owner = 'arturisto'
-g = Github(token)
-u = g.get_user()
-repo = u.get_repo("DI-Learning-Exercises")
+# token = ''  # here comes token!! need to understand how to keep it secured and still online
+# owner = 'arturisto'
+# g = Github(token)
+# u = g.get_user()
+# repo = u.get_repo("DI-Learning-Exercises")
 
->>>>>>> e10be0f0848ffca6cbb32437d5f5051bd33d97a6
 
 @app.route('/')
 def index():
@@ -31,16 +23,39 @@ def index():
 
 @app.route('/profile')
 def profile():
-    return flask.render_template('profile.html')
+    q = db.session.query(models.User)
+    return flask.render_template('profile.html', users=q)
 
 
-@app.route('/login')
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = forms.CreateUser()
+    if flask.request.method == "POST":
+        email = form.email.data
+        password = form.password.data
+    return flask.render_template('signup.html', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.CreateUser()
+
+    # form = CreateUserForm(request.form)
+    # if form.validate_on_submit():
+        # user = User()
+        # form.populate_obj(user)  # Copies matching attributes from form onto user
+    if flask.request.method == "POST":
+        name = form.name.data
+        email = form.email.data
+        username = form.username.data
+        password = form.password.data
+        new_user = models.User()
+        form.populate_obj(new_user)
+        db.session.add(new_user)
+        db.session.commit()
+        return flask.render_template('home.html')
     return flask.render_template('login.html', form=form)
 
-<<<<<<< HEAD
-=======
 
 @app.route('/test')
 def github_test():
@@ -89,7 +104,7 @@ def render_file(course, week, day, file):
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
 
->>>>>>> e10be0f0848ffca6cbb32437d5f5051bd33d97a6
+
 @app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
 def weeks():
     course = {              # !Temporary! data will come from database
@@ -121,7 +136,3 @@ def lesson():
 @app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
 def exercise():
     return flask.render_template('exercise.html')
-<<<<<<< HEAD
-=======
-
->>>>>>> e10be0f0848ffca6cbb32437d5f5051bd33d97a6
