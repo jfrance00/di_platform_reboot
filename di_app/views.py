@@ -3,55 +3,17 @@ import flask
 import requests
 import mistune
 import ast
-
+from . import syllabus as syl
 from . import forms, models, create_user
 from . import app, db
-import flask_login #LoginManager, login_user, login_required, logout_user, current_user
+import flask_login  # LoginManager, login_user, login_required, logout_user, current_user
 
-token = 'd8fb39b6be1754ad738479916c2dfadbaacb4d37'  # here comes token!! need to understand how to keep it secured and still online
-owner = 'arturisto'
-g = Github(token)
-u = g.get_user()
-repo = u.get_repo("DI-Learning-Exercises")
-
-def create_dict_of_courses(syllabus):
-    """
-    Create a dict of courses out of the syllabus.
-    The dict is used for dynamicly create the dropdown nav bar of the courses
-    :param syllabus:
-    :return:
-    """
-    courses = dict()
-    for key, value in syllabus.items():
-        if "Python" in key:
-            if "Python" in courses:
-                courses["Python"].append(key)
-            else:
-                courses["Python"] = [key]
-        elif "Java" in key:
-            if "Java" in courses:
-                courses["Java"].append(key)
-            else:
-                courses["Java"] = [key]
-        else:
-            if "Other" in courses:
-                courses["Other"].append(key)
-            else:
-                courses["Other"] = [key]
-    return courses
+syllabus = syl.Syllabus()
 
 
-def get_list_of_courses():
-    """
-    Get list of courses on github in the courses folder
-    :return:
-    """
-    list_of_courses = []
-    cont = repo.get_contents("courses")
-    for item in cont:
-        name = item.name
-        list_of_courses.append(name.strip(".json"))
-    return list_of_courses
+def get_course_description(param):
+    pass
+
 
 @app.route('/')
 def index():
@@ -60,8 +22,7 @@ def index():
     :return:
     """
 
-    flask.session['list_of_courses'] = get_list_of_courses()  # store the dict in the session for future use
-    return flask.render_template('home.html', data=flask.session['list_of_courses'])
+    return flask.render_template('home.html', list_of_courses=syllabus.list_of_courses, course_data=syllabus.syllabuses)
 
 
 @app.route('/profile/')
@@ -71,16 +32,16 @@ def profile():
     return flask.render_template('profile.html', users=users)
 
 
-#----------------------login/out----------------------------------
+# ----------------------login/out----------------------------------
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = forms.Login()
-    if flask.request.method == 'POST':       # does not work with "if form.validate_on_submit():"
+    if flask.request.method == 'POST':  # does not work with "if form.validate_on_submit():"
         login_email = form.email.data
         user = models.User.query.filter_by(email=login_email).first()
-        if user:                                   # verifies credentials against database
+        if user:  # verifies credentials against database
             if user.password == form.password.data:
                 create_user.load_user(user.id)
                 user.authenticated = True
@@ -91,15 +52,6 @@ def login():
     return flask.render_template('login.html', form=form)
 
 
-@app.route('/course/<course>')  # TODO course will be turned into a variable to pull relevant data
-def weeks(course):
-    course_path = "courses/" + course + ".json"
-    cont = repo.get_contents(course_path)  # get syllabus
-    byte_str = cont.decoded_content  # decoded repo data
-    dict_str = byte_str.decode("UTF-8")  # parse the bytes to string
-    syllabus = ast.literal_eval(dict_str)  # eval string to dict
-    flask.session['syllabus'] = syllabus
-    return flask.render_template('weeks.html', data=flask.session['syllabus']["weeks"], course=course)
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     user = models.load_user()
@@ -116,7 +68,7 @@ def signup():
     form = forms.CreateUser()
 
     if flask.request.method == "POST":
-    # if form.validate_on_submit():
+        # if form.validate_on_submit():
         new_user = models.User()
         new_user.is_authenticated = False
         form.populate_obj(new_user)
@@ -124,6 +76,9 @@ def signup():
         db.session.commit()
         return flask.redirect('login')
     return flask.render_template('signup.html', form=form)
+
+
+# ----------------------end of login/out----------------------------------
 
 @app.route('/test')
 def github_test():
@@ -141,54 +96,61 @@ def github_test():
     return flask.render_template("github_test.html", data=syllabus, show="courses")
 
 
-@app.route("/course/<course>")
-@flask_login.login_required
-def render_course(course):
-    course_syllabus = flask.session['syllabus'][course]
-    return flask.render_template("github_test.html", data=course_syllabus, show="weeks", course=course)
+@app.route('/course/<course>')
+def weeks(course):
+    return flask.render_template('weeks.html', data=syllabus.syllabuses[course]['weeks'], course=course)
 
 
 @app.route("/course/<course>/<week>")
 def days(course, week):
-    days_data = flask.session['syllabus']["weeks"][week]['Days']
-    others = flask.session['syllabus']["weeks"][week]['other resources']
+    days_data = syllabus.syllabuses[course]['weeks'][week]['Days']
+    others = syllabus.syllabuses[course]['weeks'][week]['other resources']
     return flask.render_template("days.html", data=days_data, others=others, course=course, week=week)
 
 
 @app.route("/course/<course>/<week>/<day>")
 def day(course, week, day):
-    course_day = flask.session['syllabus']["weeks"][week]['Days'][day]
+    course_day = syllabus.syllabuses[course]['weeks'][week]['Days'][day]
     return flask.render_template("lesson.html", data=course_day, course=course, week=week, day=day)
 
 
-def get_file_type(week, day, file):
-    day = flask.session['syllabus']["weeks"][week]['Days'][day]
-    for key, value in day.items():
-        if key == "onsite":
-            if file in value["Class Files"]:
-                return "class"
+def get_file_path(course, week, day, file):
+    if day in ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"]:
+        day = syllabus.syllabuses[course]['weeks'][week]['Days'][day]
+
+        # check if file is "day" file or other resources
+
+        for key, value in day.items():
+            if key == "onsite":
+                if file in value["Class Files"]:
+                    file_type = "class"
+                else:
+                    file_type = "exercise"
+            elif key == "online":
+                if file in value['Exercises']:
+                    file_type = "exercise"
             else:
-                return "exercise"
-        elif key == "online":
-            if file in value['Exercises']:
-                return "exercise"
+                continue
+
+        if file_type == "exercise":
+            return syllabus.syllabuses[course]['weeks'][week]["Notion"] + "/Exercises/" + \
+                   file + ".md"
         else:
-            continue
+            return syllabus.syllabuses[course]['weeks'][week]["Notion"] + "/" + \
+                   file + ".md"
+
+    elif day in syllabus.syllabuses[course]['weeks'][week]["other resources"]:
+
+        return syllabus.syllabuses[course]['weeks'][week]["Notion"] + "/" + day + "/" +\
+               file + ".md"
 
 
 @app.route("/course/<course>/<week>/<day>/<file>")
 def render_file(course, week, day, file):
-    file_type = get_file_type(week, day, file)
-    if file_type == "exercise":
-        path = flask.session['syllabus']["weeks"][week]["Notion"] + "/Exercises/" + \
-               file + ".md"
-    else:
-        path = flask.session['syllabus']["weeks"][week]["Notion"] + "/" + \
-               file + ".md"
+    file_path = get_file_path(course, week, day, file)
 
-    cont = repo.get_contents(path)
+    r = syllabus.repo
+    cont = syllabus.repo.get_contents(file_path)
     r = requests.get(cont.download_url)
     return flask.render_template("exercise.html", data=mistune.markdown(r.text), course=course, week=week, day=day,
                                  file=file)
-
-

@@ -14,34 +14,107 @@
 </nav>
 
 
-{% for key,value in data.items() %}
-<div class="card">
-<!--  <div class="card-header">-->
-<!--    lecture/exercise-->
-<!--  </div>-->
-  <div class="card-body">
-    <h5 class="card-title"> {{key}} - {{value['short description']}} </h5>
-    <p class="card-text"> {{value['long description']}}.</p>
-    <a href="/course/{{course}}/{{week}}/{{key}}" class="btn btn-primary"> {{key}} </a>
-  </div>
+<!--      ____________________tabs___________________-->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+
+  {% for key,value in data.items() %}
+  <li class="nav-item">
+  {% if loop.index ==1 %}
+    <a class="nav-link active" id="t{{loop.index}}-tab" data-toggle="tab" href="#t{{loop.index}}" role="tab" aria-controls="{{loop.index}}" aria-selected="true">{{key}}</a>
+   {% else %}
+     <a class="nav-link" id="t{{loop.index}}-tab" data-toggle="tab" href="#t{{loop.index}}" role="tab" aria-controls="{{loop.index}}" aria-selected="true">{{key}}</a>
+   {% endif %}
+   </li>
+  {% endfor %}
+   {% for key,value in others.items() %}
+  <li class="nav-item">
+    <a class="nav-link" id="o{{loop.index}}-tab" data-toggle="tab" href="#o{{loop.index}}" role="tab" aria-controls="{{loop.index}}" aria-selected="true">{{key}}</a>
+   </li>
+  {% endfor %}
+</ul>
+<!--      ____________________end tabs___________________-->
+
+
+
+<!--__________________start data __________-->
+<div class="tab-content" id="myTabContent">
+  {% for key,value in data.items() %}
+    {% if loop.index ==1 %}
+      <div class="tab-pane fade show active" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+    {% else %}
+      <div class="tab-pane fade" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+    {% endif %}
+
+      <!--       _____________DAY_____________-->
+
+            <div class="card">
+              <div class="card-body">
+              </div>
+
+              {% if "onsite" in value %}
+              <h5>ONSITE</h5>
+                {% for item in value['onsite']['Class Files'] %}
+                <div class=" card-header">
+                  <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                </div>
+                {% endfor %}
+                 {% for item in value['onsite']['Exercises'] %}
+                    <div class=" card-header">
+                        <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                    </div>
+                {% endfor %}
+              {% endif %}
+
+             {% if "online" in value %}
+              <h5>ONLINE</h5>
+                {% for item in value['online']['Class Files'] %}
+                <div class=" card-header">
+                  <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                </div>
+                {% endfor %}
+                {% for item in value['online']['Exercises'] %}
+                    <div class=" card-header">
+                        <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            </div>
+              <!--       _____________end DAY_____________-->
+
+
+      </div>
+  {% endfor %}
+  {% for key,value in others.items() %}
+      <div class="tab-pane fade" id="o{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+
+              <!--       _____________DAY_____________-->
+
+            <div class="card">
+              <div class="card-body">
+              </div>
+
+              {% if "onsite" in value %}
+              <h5>ONSITE</h5>
+                {% for item in value['onsite'] %}
+                <div class=" card-header">
+                  <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                </div>
+                {% endfor %}
+               {% endif %}
+             {% if "online" in value %}
+              <h5>ONLINE</h5>
+                {% for item in value['online'] %}
+                <div class=" card-header">
+                  <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
+                </div>
+                {% endfor %}
+            {% endif %}
+            </div>
+              <!--       _____________end DAY_____________-->
+
+      </div>
+  {% endfor %}
 </div>
-{% endfor %}
 
-{% for key,value in others.items() %}
-<div class="card">
-<!--  <div class="card-header">-->
-<!--    lecture/exercise-->
-<!--  </div>-->
-  <div class="card-body">
-    <h5 class="card-title"> {{key}} - {{value['short description']}} </h5>
-    <p class="card-text"> {{value['long description']}}.</p>
-    <a href="/course/{{course}}/{{week}}/{{key}}" class="btn btn-primary"> {{key}} </a>
-    <h5 class="card-title"> Day {{ day }} </h5>
-    <p class="card-text"> With some objectives for the lesson that day :).</p>
-    <a href="{{ url_for('lesson') }}" class="btn btn-primary"> Day # </a>
-  </div>
-</div>
-{% endfor %}
-
-
+<!--____________________end data __________-->
 {% endblock %}
