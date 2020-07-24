@@ -13,6 +13,3 @@ class CreateUser:
     def save_signup_data(self):             #Redundant - info in view file, either figure out how to call function in view or delete
         pass
 
-
-
-c
