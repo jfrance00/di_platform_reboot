@@ -5,16 +5,18 @@ import requests
 import markdown
 import mistune
 import ast
+import sqlite3
+import flask_login #LoginManager, login_user, login_required, logout_user, current_user
 
-from . import app
-from . import forms, models
+
+from . import forms, models, create_user
 from . import app, db
 
-token = ''  # here comes token!! need to understand how to keep it secured and still online
-owner = 'arturisto'
-g = Github(token)
-u = g.get_user()
-repo = u.get_repo("DI-Learning-Exercises")
+# token = ''  # here comes token!! need to understand how to keep it secured and still online
+# owner = 'arturisto'
+# g = Github(token)
+# u = g.get_user()
+# repo = u.get_repo("DI-Learning-Exercises")
 
 
 @app.route('/')
@@ -22,15 +24,57 @@ def index():
     return flask.render_template('home.html')
 
 
-@app.route('/profile')
+@app.route('/profile/')
+# @login.unauthorized()
 def profile():
-    return flask.render_template('profile.html')
+    users = models.User.query.all()
+    return flask.render_template('profile.html', users=users)
 
 
-@app.route('/login')
+#----------------------login/out----------------------------------
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = forms.CreateUser()
+    form = forms.Login()
+    if flask.request.method == 'POST':       # does not work with "if form.validate_on_submit():"
+        login_email = form.email.data
+        user = models.User.query.filter_by(email=login_email).first()
+        if user:                                   # verifies credentials against database
+            if user.password == form.password.data:
+                create_user.load_user(user.id)
+                user.authenticated = True
+                db.session.add(user)
+                db.session.commit()
+                flask_login.login_user(user, remember=True)
+                return flask.redirect(flask.url_for('profile'))
     return flask.render_template('login.html', form=form)
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    user = models.load_user()
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    flask_login.logout_user()
+    print(user.authenticated)
+    return flask.redirect('login')
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = forms.CreateUser()
+
+    if flask.request.method == "POST":
+    # if form.validate_on_submit():
+        new_user = models.User()
+        new_user.is_authenticated = False
+        form.populate_obj(new_user)
+        db.session.add(new_user)
+        db.session.commit()
+        return flask.redirect('login')
+    return flask.render_template('signup.html', form=form)
 
 
 @app.route('/test')
@@ -50,6 +94,7 @@ def github_test():
 
 
 @app.route("/course/<course>")
+@flask_login.login_required
 def render_course(course):
     course_syllabus = flask.session['syllabus'][course]
     return flask.render_template("github_test.html", data=course_syllabus, show="weeks", course=course)
@@ -79,6 +124,7 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
+
 
 @app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
 def weeks():
@@ -111,4 +157,3 @@ def lesson():
 @app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
 def exercise():
     return flask.render_template('exercise.html')
-
