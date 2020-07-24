@@ -3,17 +3,22 @@ import flask
 import requests
 import mistune
 import ast
-import urllib.parse
-from . import forms
-from . import app
-import string
 
-token = '0f5e35b4304339db5b61e05499a2a1babec0a395'  # here comes token!! need to understand how to keep it secured and still online
+from . import forms, models, create_user
+from . import app, db
+
+token = ''  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
 repo = u.get_repo("DI-Learning-Exercises")
 
+import flask_login #LoginManager, login_user, login_required, logout_user, current_user
+# token = ''  # here comes token!! need to understand how to keep it secured and still online
+# owner = 'arturisto'
+# g = Github(token)
+# u = g.get_user()
+# repo = u.get_repo("DI-Learning-Exercises")
 
 def create_dict_of_courses(syllabus):
     """
@@ -54,7 +59,6 @@ def get_list_of_courses():
         list_of_courses.append(name.strip(".json"))
     return list_of_courses
 
-
 @app.route('/')
 def index():
     """
@@ -68,14 +72,30 @@ def index():
     return flask.render_template('home.html', data=flask.session['list_of_courses'])
 
 
-@app.route('/profile')
+@app.route('/profile/')
+# @login.unauthorized()
 def profile():
-    return flask.render_template('profile.html')
+    users = models.User.query.all()
+    return flask.render_template('profile.html', users=users)
 
 
-@app.route('/login')
+#----------------------login/out----------------------------------
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = forms.CreateUser()
+    form = forms.Login()
+    if flask.request.method == 'POST':       # does not work with "if form.validate_on_submit():"
+        login_email = form.email.data
+        user = models.User.query.filter_by(email=login_email).first()
+        if user:                                   # verifies credentials against database
+            if user.password == form.password.data:
+                create_user.load_user(user.id)
+                user.authenticated = True
+                db.session.add(user)
+                db.session.commit()
+                flask_login.login_user(user, remember=True)
+                return flask.redirect(flask.url_for('profile'))
     return flask.render_template('login.html', form=form)
 
 
@@ -88,6 +108,52 @@ def weeks(course):
     syllabus = ast.literal_eval(dict_str)  # eval string to dict
     flask.session['syllabus'] = syllabus
     return flask.render_template('weeks.html', data=flask.session['syllabus']["weeks"], course=course)
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    user = models.load_user()
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    flask_login.logout_user()
+    print(user.authenticated)
+    return flask.redirect('login')
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = forms.CreateUser()
+
+    if flask.request.method == "POST":
+    # if form.validate_on_submit():
+        new_user = models.User()
+        new_user.is_authenticated = False
+        form.populate_obj(new_user)
+        db.session.add(new_user)
+        db.session.commit()
+        return flask.redirect('login')
+    return flask.render_template('signup.html', form=form)
+
+@app.route('/test')
+def github_test():
+    # get syllabus data
+    cont = repo.get_contents("syllabus.json")
+    byte_str = cont.decoded_content
+    dict_str = byte_str.decode("UTF-8")
+    syllabus = ast.literal_eval(dict_str)
+    flask.session['syllabus'] = syllabus
+    print(repr(syllabus))
+    # r = requests.get(cont.download_url)
+    # html = flask.Markup(markdown.markdown(r.text))
+    x = 3
+    # return flask.render_template("github_test.html", data = mistune.markdown(r.text))
+    return flask.render_template("github_test.html", data=syllabus, show="courses")
+
+
+@app.route("/course/<course>")
+@flask_login.login_required
+def render_course(course):
+    course_syllabus = flask.session['syllabus'][course]
+    return flask.render_template("github_test.html", data=course_syllabus, show="weeks", course=course)
 
 
 @app.route("/course/<course>/<week>")
@@ -132,3 +198,38 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     return flask.render_template("exercise.html", data=mistune.markdown(r.text), course=course, week=week, day=day,
                                  file=file)
+    # html = flask.Markup(markdown.markdown(r.text))
+    return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
+
+
+@app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
+def weeks():
+    course = {              # !Temporary! data will come from database
+        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'days_of_week': [1, 2, 3, 4, 5],
+    }
+    return flask.render_template('weeks.html', course=course)
+
+
+@app.route('/course/weeknum/days')  #TODO course variable
+def days():
+    course = {              # !Temporary! data will come from database
+        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'days_of_week': [1, 2, 3, 4, 5],
+    }
+    return flask.render_template('days.html', course=course)
+
+
+@app.route('/course/weeknum/daynum')  #TODO course variable and day #
+def lesson():
+    course = {  # !Temporary! data will come from database
+        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'days_of_week': [1, 2, 3, 4, 5],
+        'lesson_activities': ['Lecture1', 'Lecture2', 'xp', 'xp gold', 'xp ninja', 'Daily']
+    }
+    return flask.render_template('lesson.html', course=course)
+
+
+@app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
+def exercise():
+    return flask.render_template('exercise.html')

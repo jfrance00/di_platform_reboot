@@ -13,6 +13,7 @@
   </ol>
 </nav>
 
+<<<<<<< HEAD
 <!-- end breadcrumb-->
 
 <div class = "row" style ="">
@@ -27,20 +28,32 @@
       </div>
     </div>
   {% endfor %}
-  </div>
+</div>
+<!-- end breadcrumb -->
 
-<!--<div class = "row" style ="">-->
-<!--    {% for n in range(18) %}-->
-<!--        <div class="card" style="width: 18rem;margin:5px;">-->
-<!--          <div class="card-body">-->
-<!--            <img src = "https://image.shutterstock.com/image-photo/computer-600w-335658254.jpg" style="width:50px;height:50px; border-radius:50%">-->
-<!--            <h5 class="card-title"> Week {{n}} </h5>-->
-<!--            <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>-->
-<!--            <p class="card-text"> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standardum</p>-->
-<!--            <a href="/course/{{course}}/{{key}}" class="card-link"> {{key}}</a>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--    {% endfor %}-->
+
+<!--{% for week in course['length_in_weeks'] %}-->
+<!--<div class="card" style="width: 18rem;">-->
+<!--  <div class="card-body">-->
+<!--    <h5 class="card-title"> Week {{ week }} </h5>-->
+<!--    <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>-->
+<!--    <p class="card-text"> Here's some details about what we cover this week</p>-->
+<!--    <a href=" {{ url_for('days') }}" class="card-link"> Days in the Week </a>-->
+<!--&gt;>>>>>> origin/master-->
 <!--  </div>-->
+
+<div class = "row" style ="">
+    {% for n in range(18) %}
+        <div class="card" style="width: 18rem;margin:5px;">
+          <div class="card-body">
+            <img src = "https://image.shutterstock.com/image-photo/computer-600w-335658254.jpg" style="width:50px;height:50px; border-radius:50%">
+            <h5 class="card-title"> Week {{n}} </h5>
+            <h6 class="card-subtitle mb-2 text-muted"> Catchy Name</h6>
+            <p class="card-text"> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standardum</p>
+            <a href="/course/{{course}}/{{key}}" class="card-link"> {{key}}</a>
+          </div>
+        </div>
+    {% endfor %}
+  </div>
 
 {% endblock %}
