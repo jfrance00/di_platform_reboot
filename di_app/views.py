@@ -1,25 +1,71 @@
-import json
 from github import Github
 import flask
 import requests
-import markdown
 import mistune
 import ast
-
+import urllib.parse
+from . import forms
 from . import app
-from . import forms, models
-from . import app, db
+import string
 
-token = ''  # here comes token!! need to understand how to keep it secured and still online
+token = '0f5e35b4304339db5b61e05499a2a1babec0a395'  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
 repo = u.get_repo("DI-Learning-Exercises")
 
 
+def create_dict_of_courses(syllabus):
+    """
+    Create a dict of courses out of the syllabus.
+    The dict is used for dynamicly create the dropdown nav bar of the courses
+    :param syllabus:
+    :return:
+    """
+    courses = dict()
+    for key, value in syllabus.items():
+        if "Python" in key:
+            if "Python" in courses:
+                courses["Python"].append(key)
+            else:
+                courses["Python"] = [key]
+        elif "Java" in key:
+            if "Java" in courses:
+                courses["Java"].append(key)
+            else:
+                courses["Java"] = [key]
+        else:
+            if "Other" in courses:
+                courses["Other"].append(key)
+            else:
+                courses["Other"] = [key]
+    return courses
+
+
+def get_list_of_courses():
+    """
+    Get list of courses on github in the courses folder
+    :return:
+    """
+    list_of_courses = []
+    cont = repo.get_contents("courses")
+    for item in cont:
+        name = item.name
+        list_of_courses.append(name.strip(".json"))
+    return list_of_courses
+
+
 @app.route('/')
 def index():
-    return flask.render_template('home.html')
+    """
+    home page, shows the list of courses
+    :return:
+    """
+
+    flask.session['list_of_courses'] = get_list_of_courses()  # store the dict in the session for future use
+    # flask.session['dict_of_courses'] = create_dict_of_courses(syllabus)
+    #
+    return flask.render_template('home.html', data=flask.session['list_of_courses'])
 
 
 @app.route('/profile')
@@ -33,82 +79,56 @@ def login():
     return flask.render_template('login.html', form=form)
 
 
-@app.route('/test')
-def github_test():
-    # get syllabus data
-    cont = repo.get_contents("syllabus.json")
-    byte_str = cont.decoded_content
-    dict_str = byte_str.decode("UTF-8")
-    syllabus = ast.literal_eval(dict_str)
+@app.route('/course/<course>')  # TODO course will be turned into a variable to pull relevant data
+def weeks(course):
+    course_path = "courses/" + course + ".json"
+    cont = repo.get_contents(course_path)  # get syllabus
+    byte_str = cont.decoded_content  # decoded repo data
+    dict_str = byte_str.decode("UTF-8")  # parse the bytes to string
+    syllabus = ast.literal_eval(dict_str)  # eval string to dict
     flask.session['syllabus'] = syllabus
-    print(repr(syllabus))
-    # r = requests.get(cont.download_url)
-    # html = flask.Markup(markdown.markdown(r.text))
-    x = 3
-    # return flask.render_template("github_test.html", data = mistune.markdown(r.text))
-    return flask.render_template("github_test.html", data=syllabus, show="courses")
-
-
-@app.route("/course/<course>")
-def render_course(course):
-    course_syllabus = flask.session['syllabus'][course]
-    return flask.render_template("github_test.html", data=course_syllabus, show="weeks", course=course)
+    return flask.render_template('weeks.html', data=flask.session['syllabus']["weeks"], course=course)
 
 
 @app.route("/course/<course>/<week>")
-def render_week(course, week):
-    course_week = flask.session['syllabus'][course][week]
-
-    return flask.render_template("github_test.html", data=course_week, show="days", course=course, week=week)
+def days(course, week):
+    days_data = flask.session['syllabus']["weeks"][week]['Days']
+    others = flask.session['syllabus']["weeks"][week]['other resources']
+    return flask.render_template("days.html", data=days_data, others=others, course=course, week=week)
 
 
 @app.route("/course/<course>/<week>/<day>")
-def render_day(course, week, day):
-    course_day = flask.session['syllabus'][course][week][day]
+def day(course, week, day):
+    course_day = flask.session['syllabus']["weeks"][week]['Days'][day]
+    return flask.render_template("lesson.html", data=course_day, course=course, week=week, day=day)
 
-    return flask.render_template("github_test.html", data=course_day, show="specific_day", course=course, week=week,
-                                 day=day)
+
+def get_file_type(week, day, file):
+    day = flask.session['syllabus']["weeks"][week]['Days'][day]
+    for key, value in day.items():
+        if key == "onsite":
+            if file in value["Class Files"]:
+                return "class"
+            else:
+                return "exercise"
+        elif key == "online":
+            if file in value['Exercises']:
+                return "exercise"
+        else:
+            continue
 
 
 @app.route("/course/<course>/<week>/<day>/<file>")
 def render_file(course, week, day, file):
-    path = flask.session['syllabus'][course][week]["Notion"] + "/" + flask.session['syllabus'][course][week][day][
-        file] + ".md"
+    file_type = get_file_type(week, day, file)
+    if file_type == "exercise":
+        path = flask.session['syllabus']["weeks"][week]["Notion"] + "/Exercises/" + \
+               file + ".md"
+    else:
+        path = flask.session['syllabus']["weeks"][week]["Notion"] + "/" + \
+               file + ".md"
+
     cont = repo.get_contents(path)
-
     r = requests.get(cont.download_url)
-    # html = flask.Markup(markdown.markdown(r.text))
-    return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
-
-@app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
-def weeks():
-    course = {              # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-    }
-    return flask.render_template('weeks.html', course=course)
-
-
-@app.route('/course/weeknum/days')  #TODO course variable
-def days():
-    course = {              # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-    }
-    return flask.render_template('days.html', course=course)
-
-
-@app.route('/course/weeknum/daynum')  #TODO course variable and day #
-def lesson():
-    course = {  # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-        'lesson_activities': ['Lecture1', 'Lecture2', 'xp', 'xp gold', 'xp ninja', 'Daily']
-    }
-    return flask.render_template('lesson.html', course=course)
-
-
-@app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
-def exercise():
-    return flask.render_template('exercise.html')
-
+    return flask.render_template("exercise.html", data=mistune.markdown(r.text), course=course, week=week, day=day,
+                                 file=file)

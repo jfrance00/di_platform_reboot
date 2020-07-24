@@ -6,7 +6,25 @@
 
 <h1> Developers Institute</h1>
 <h3> Welcome info</h3>
-
-<p>link to prep work</p>
-
+<div class = "row">
+    <div class = "col-3">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                  <label class="btn btn-primary image-toggler" data-image-id="#image1">
+                        <input type="radio" name="options" id="option1"> Show Image 1
+                  </label>
+              </li>
+                <li class="nav-item">
+                    <label class="btn btn-primary image-toggler" data-image-id="#image2">
+                        <input type="radio" name="options" id="option2"> Show Image 2
+                    </label>
+                </li>
+            </ul>
+    </div>
+    <div class = "col-9">
+              <img class="w-100 image-toggle" title="image 1" id="image1" src="https://cdn.pixabay.com/photo/2014/05/02/21/49/home-office-336373_1280.jpg" alt="First slide">
+              <img class="w-100 image-toggle" style="display:none;" title="image 1" id="image2" src="https://thumbs.dreamstime.com/z/online-learning-course-concept-student-using-computer-laptop-white-blank-screen-training-online-writing-lecture-note-151486217.jpg">
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -7,26 +7,49 @@
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item active"><a href="#">Course (Full/Part Time)</a></li>
-    <li class="breadcrumb-item" aria-current="page"><a href="{{ url_for('weeks')}}">Weeks</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for('days') }}">Days</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Lesson</li>
+    <li class="breadcrumb-item" aria-current="page"><a href="/">Courses</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href = "/course/{{course}}">{{course}}</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href="/course/{{course}}/{{week}}">{{week}}</a></li>
+    <li class="breadcrumb-item" aria-current="page">{{day}}</li>
   </ol>
 </nav>
 
 
-{% for activity in course['lesson_activities'] %}
+
 <div class="card">
-  <div class="card-header">
-    lecture/exercise
-  </div>
   <div class="card-body">
-    <h5 class="card-title">{{ activity }}</h5>
-    <p class="card-text"> With some details about the material within :).</p>
-    <a href= "{{ url_for('exercise') }}" class="btn btn-primary"> Exercise Deets</a>
+    <h3>{{day}} - {{data['short description']}}</h3>
   </div>
+  {% if "onsite" in data %}
+  <h5>ONSITE</h5>
+    {% for item in data['onsite']['Class Files'] %}
+    <div class=" card-header">
+      <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
+    </div>
+    {% endfor %}
+     {% for item in data['onsite']['Exercises'] %}
+        <div class=" card-header">
+            <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
+        </div>
+    {% endfor %}
+  {% endif %}
+
+    {% if "online" in data %}
+  <h5>ONLINE</h5>
+    {% for item in data['online']['Class Files'] %}
+    <div class=" card-header">
+      <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
+    </div>
+    {% endfor %}
+    {% for item in data['online']['Exercises'] %}
+        <div class=" card-header">
+            <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
+        </div>
+    {% endfor %}
+  {% endif %}
+
 </div>
-{% endfor %}
+
 
 
 {% endblock %}

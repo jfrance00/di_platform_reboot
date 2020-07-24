@@ -7,25 +7,39 @@
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item active">Course (Full/Part Time)</a></li>
-    <li class="breadcrumb-item" aria-current="page"><a href="{{ url_for('weeks')}}">Weeks</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Days</li>
+    <li class="breadcrumb-item active" aria-current="page"><a href="/">Courses</a></li>
+    <li class="breadcrumb-item"><a href = "/course/{{course}}">{{course}}</a></li>
+    <li class="breadcrumb-item" aria-current="page">{{week}}</li>
   </ol>
 </nav>
 
 
-{% for day in course['days_of_week'] %}
+{% for key,value in data.items() %}
 <div class="card">
-  <div class="card-header">
-    lecture/exercise
-  </div>
+<!--  <div class="card-header">-->
+<!--    lecture/exercise-->
+<!--  </div>-->
   <div class="card-body">
-    <h5 class="card-title"> Day # </h5>
-    <p class="card-text"> With some objectives for the lesson that day :).</p>
-    <a href="{{ url_for('lesson') }}" class="btn btn-primary"> Day # </a>
+    <h5 class="card-title"> {{key}} - {{value['short description']}} </h5>
+    <p class="card-text"> {{value['long description']}}.</p>
+    <a href="/course/{{course}}/{{week}}/{{key}}" class="btn btn-primary"> {{key}} </a>
   </div>
 </div>
 {% endfor %}
+
+{% for key,value in others.items() %}
+<div class="card">
+<!--  <div class="card-header">-->
+<!--    lecture/exercise-->
+<!--  </div>-->
+  <div class="card-body">
+    <h5 class="card-title"> {{key}} - {{value['short description']}} </h5>
+    <p class="card-text"> {{value['long description']}}.</p>
+    <a href="/course/{{course}}/{{week}}/{{key}}" class="btn btn-primary"> {{key}} </a>
+  </div>
+</div>
+{% endfor %}
+
 
 
 {% endblock %}
