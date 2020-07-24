@@ -7,15 +7,15 @@
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item active"><a href="#">Course (Full/Part Time)</a></li>
-    <li class="breadcrumb-item" aria-current="page"><a href="{{ url_for('weeks')}}">Weeks</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for('days') }}">Days</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for('days') }}">Lesson</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Exercise</li>
+     <li class="breadcrumb-item" aria-current="page"><a href="/">Courses</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href = "/course/{{course}}">{{course}}</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href="/course/{{course}}/{{week}}">{{week}}</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href="/course/{{course}}/{{week}}/{{day}}">{{day}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
   </ol>
 </nav>
 <h4> Here is a bunch of new info to learn! </h4>
-
+ {{data|safe}}
 
 
 {% endblock %}
