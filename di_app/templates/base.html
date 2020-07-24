@@ -48,12 +48,15 @@
 
         </div>
     </ul>
+    {% if current_user.id %}
+      <span class="navbar-text">
+        <a href="{{ url_for('logout') }}">Logout({{ current_user.username }})</a>
+      </span>
+    {% else %}
       <span class="navbar-text">
         <a href="{{ url_for('login') }}">Login</a>
       </span>
-      <span class="navbar-text">
-        <a href="{{ url_for('logout') }}">Logout</a>
-      </span>
+    {% endif %}
   </div>
 </nav>
 

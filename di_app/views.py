@@ -6,9 +6,9 @@ import ast
 
 from . import forms, models, create_user
 from . import app, db
-import flask_login #LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
-token = 'd8fb39b6be1754ad738479916c2dfadbaacb4d37'  # here comes token!! need to understand how to keep it secured and still online
+token = '48146adc218e3e17525fa94ca45d67ace55b6b03'  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
@@ -65,13 +65,26 @@ def index():
 
 
 @app.route('/profile/')
-# @login.unauthorized()
 def profile():
     users = models.User.query.all()
-    return flask.render_template('profile.html', users=users)
+    active_user = current_user
+    return flask.render_template('profile.html', users=users, current_user=current_user)
 
 
 #----------------------login/out----------------------------------
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = forms.CreateUser()
+    if flask.request.method == "POST":
+    # if form.validate_on_submit():
+        new_user = models.User()
+        new_user.is_authenticated = False
+        form.populate_obj(new_user)
+        db.session.add(new_user)
+        db.session.commit()
+        return flask.redirect('login')
+    return flask.render_template('signup.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -82,16 +95,28 @@ def login():
         user = models.User.query.filter_by(email=login_email).first()
         if user:                                   # verifies credentials against database
             if user.password == form.password.data:
-                create_user.load_user(user.id)
+                models.load_user(user.id)
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
-                flask_login.login_user(user, remember=True)
+                login_user(user, remember=True)
                 return flask.redirect(flask.url_for('profile'))
     return flask.render_template('login.html', form=form)
 
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    user = models.load_user(current_user.id)
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    logout_user()
+    print(user.authenticated)
+    return flask.redirect('login')
+
+
 @app.route('/course/<course>')  # TODO course will be turned into a variable to pull relevant data
+@login_required
 def weeks(course):
     course_path = "courses/" + course + ".json"
     cont = repo.get_contents(course_path)  # get syllabus
@@ -100,30 +125,9 @@ def weeks(course):
     syllabus = ast.literal_eval(dict_str)  # eval string to dict
     flask.session['syllabus'] = syllabus
     return flask.render_template('weeks.html', data=flask.session['syllabus']["weeks"], course=course)
-@app.route('/logout', methods=['GET', 'POST'])
-def logout():
-    user = models.load_user()
-    user.authenticated = False
-    db.session.add(user)
-    db.session.commit()
-    flask_login.logout_user()
-    print(user.authenticated)
-    return flask.redirect('login')
 
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    form = forms.CreateUser()
 
-    if flask.request.method == "POST":
-    # if form.validate_on_submit():
-        new_user = models.User()
-        new_user.is_authenticated = False
-        form.populate_obj(new_user)
-        db.session.add(new_user)
-        db.session.commit()
-        return flask.redirect('login')
-    return flask.render_template('signup.html', form=form)
 
 @app.route('/test')
 def github_test():
@@ -142,13 +146,14 @@ def github_test():
 
 
 @app.route("/course/<course>")
-@flask_login.login_required
+@login_required
 def render_course(course):
     course_syllabus = flask.session['syllabus'][course]
     return flask.render_template("github_test.html", data=course_syllabus, show="weeks", course=course)
 
 
 @app.route("/course/<course>/<week>")
+@login_required
 def days(course, week):
     days_data = flask.session['syllabus']["weeks"][week]['Days']
     others = flask.session['syllabus']["weeks"][week]['other resources']
@@ -156,6 +161,7 @@ def days(course, week):
 
 
 @app.route("/course/<course>/<week>/<day>")
+@login_required
 def day(course, week, day):
     course_day = flask.session['syllabus']["weeks"][week]['Days'][day]
     return flask.render_template("lesson.html", data=course_day, course=course, week=week, day=day)
@@ -177,6 +183,7 @@ def get_file_type(week, day, file):
 
 
 @app.route("/course/<course>/<week>/<day>/<file>")
+@login_required
 def render_file(course, week, day, file):
     file_type = get_file_type(week, day, file)
     if file_type == "exercise":
