@@ -12,11 +12,11 @@ import flask_login #LoginManager, login_user, login_required, logout_user, curre
 from . import forms, models, create_user
 from . import app, db
 
-# token = ''  # here comes token!! need to understand how to keep it secured and still online
-# owner = 'arturisto'
-# g = Github(token)
-# u = g.get_user()
-# repo = u.get_repo("DI-Learning-Exercises")
+token = '0f5e35b4304339db5b61e05499a2a1babec0a395'  # here comes token!! need to understand how to keep it secured and still online
+owner = 'arturisto'
+g = Github(token)
+u = g.get_user()
+repo = u.get_repo("DI-Learning-Exercises")
 
 
 @app.route('/')
@@ -125,35 +125,3 @@ def render_file(course, week, day, file):
     # html = flask.Markup(markdown.markdown(r.text))
     return flask.render_template("github_test.html", data=mistune.markdown(r.text), show="file")
 
-
-@app.route('/course/weeks') #TODO course will be turned into a variable to pull relevant data
-def weeks():
-    course = {              # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-    }
-    return flask.render_template('weeks.html', course=course)
-
-
-@app.route('/course/weeknum/days')  #TODO course variable
-def days():
-    course = {              # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-    }
-    return flask.render_template('days.html', course=course)
-
-
-@app.route('/course/weeknum/daynum')  #TODO course variable and day #
-def lesson():
-    course = {  # !Temporary! data will come from database
-        'length_in_weeks': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'days_of_week': [1, 2, 3, 4, 5],
-        'lesson_activities': ['Lecture1', 'Lecture2', 'xp', 'xp gold', 'xp ninja', 'Daily']
-    }
-    return flask.render_template('lesson.html', course=course)
-
-
-@app.route('/course/daynum/resource')  #TODO course variable, day#, resource all variables
-def exercise():
-    return flask.render_template('exercise.html')
