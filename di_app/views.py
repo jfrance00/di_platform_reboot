@@ -12,7 +12,7 @@ import flask_login #LoginManager, login_user, login_required, logout_user, curre
 from . import forms, models, create_user
 from . import app, db
 
-token = '0f5e35b4304339db5b61e05499a2a1babec0a395'  # here comes token!! need to understand how to keep it secured and still online
+token = ''  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
