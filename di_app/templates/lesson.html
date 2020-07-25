@@ -24,6 +24,7 @@
   <h5>ONSITE</h5>
     {% for item in data['onsite']['Class Files'] %}
     <div class=" card-header">
+        <img src = "/static/images/class icons/course.png" alt="class image">
       <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
     </div>
     {% endfor %}
@@ -38,6 +39,7 @@
   <h5>ONLINE</h5>
     {% for item in data['online']['Class Files'] %}
     <div class=" card-header">
+        <img src = "/static/images/class icons/course.png" alt="class image">
       <a href= "/course/{{course}}/{{week}}/{{day}}/{{item}}" class="card-text"> {{item}}</a>
     </div>
     {% endfor %}

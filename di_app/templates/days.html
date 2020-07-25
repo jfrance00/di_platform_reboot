@@ -5,6 +5,21 @@
 
 {% block body %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+        {% if category=='missing file'%}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                   {{message}}
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+        {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item active" aria-current="page"><a href="/">Courses</a></li>
@@ -37,29 +52,37 @@
 
 
 <!--__________________start data __________-->
-<div class="tab-content" id="myTabContent">
+<div class="tab-content " id="myTabContent">
+
   {% for key,value in data.items() %}
     {% if loop.index ==1 %}
-      <div class="tab-pane fade show active" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+      <div class="tab-pane fade show active" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">
+          <div class="card p-3">
+              <h4>{{value['short description']}}</h4>
+              {{value['long description']}}
+          </div>
     {% else %}
-      <div class="tab-pane fade" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+      <div class="tab-pane fade" id="t{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">
+          <div class="card p-3">
+              <h4>{{value['short description']}}</h4>
+              {{value['long description']}}
+          </div>
     {% endif %}
 
       <!--       _____________DAY_____________-->
 
-            <div class="card">
-              <div class="card-body">
-              </div>
-
+              <div class="card p-3">
               {% if "onsite" in value %}
               <h5>ONSITE</h5>
                 {% for item in value['onsite']['Class Files'] %}
                 <div class=" card-header">
+                  <img src = "/static/images/class icons/course.png" style ="width:45px;height:45px;" alt="class image">
                   <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
                 </div>
                 {% endfor %}
                  {% for item in value['onsite']['Exercises'] %}
                     <div class=" card-header">
+                        <img src = "/static/images/class icons/xp.png" style ="width:45px;height:45px;" alt="class image">
                         <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
                     </div>
                 {% endfor %}
@@ -69,11 +92,13 @@
               <h5>ONLINE</h5>
                 {% for item in value['online']['Class Files'] %}
                 <div class=" card-header">
+                  <img src = "/static/images/class icons/course.png" style ="width:45px;height:45px;" alt="class image">
                   <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
                 </div>
                 {% endfor %}
                 {% for item in value['online']['Exercises'] %}
                     <div class=" card-header">
+                        <img src = "/static/images/class icons/xp.png" style ="width:45px;height:45px;" alt="class image">
                         <a href= "/course/{{course}}/{{week}}/{{key}}/{{item}}" class="card-text"> {{item}}</a>
                     </div>
                 {% endfor %}
@@ -85,14 +110,16 @@
       </div>
   {% endfor %}
   {% for key,value in others.items() %}
-      <div class="tab-pane fade" id="o{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">{{value['long description']}}
+      <div class="tab-pane fade" id="o{{loop.index}}" role="tabpanel" aria-labelledby="{{loop.index}}-tab">
+
+            <div class="card p-3">
+              <h4>{{value['short description']}}</h4>
+              {{value['long description']}}
+          </div>
 
               <!--       _____________DAY_____________-->
 
-            <div class="card">
-              <div class="card-body">
-              </div>
-
+            <div class="card p-3">
               {% if "onsite" in value %}
               <h5>ONSITE</h5>
                 {% for item in value['onsite'] %}
@@ -111,7 +138,6 @@
             {% endif %}
             </div>
               <!--       _____________end DAY_____________-->
-
       </div>
   {% endfor %}
 </div>
