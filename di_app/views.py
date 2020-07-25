@@ -8,7 +8,7 @@ from . import forms, models, create_user
 from . import app, db
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
-token = '48146adc218e3e17525fa94ca45d67ace55b6b03'  # here comes token!! need to understand how to keep it secured and still online
+token = '1625be1949a00603fa29bfda296abf1ca19876d2'  # here comes token!! need to understand how to keep it secured and still online
 owner = 'arturisto'
 g = Github(token)
 u = g.get_user()
@@ -53,6 +53,23 @@ def get_list_of_courses():
         list_of_courses.append(name.strip(".json"))
     return list_of_courses
 
+
+def save_lesson(course, week, day):      #saves same variables passed to lesson page where card is initially displayed
+    resource_url = flask.url_for('lesson', course=course, week=week, day=day)
+    data = flask.session['syllabus']["weeks"][week]['Days'][day]
+    lesson_dict = {
+        'URL': resource_url,
+        'course': course,
+        'week': week,
+        'day': day,
+        # 'data': data  TODO check if it makes sense to save data as part of dict, or to reference data object when making the card
+    }
+    current_user.flagged.append(lesson_dict)
+    db.session.commit()
+
+
+
+
 @app.route('/')
 def index():
     """
@@ -68,6 +85,10 @@ def index():
 def profile():
     users = models.User.query.all()
     active_user = current_user
+
+    course_day = flask.session['syllabus']["weeks"][week]['Days'][day]
+    #lesson.html", data=course_day, course=course, week=week, day=day)
+
     return flask.render_template('profile.html', users=users, current_user=current_user)
 
 
@@ -116,7 +137,6 @@ def logout():
 
 
 @app.route('/course/<course>')  # TODO course will be turned into a variable to pull relevant data
-@login_required
 def weeks(course):
     course_path = "courses/" + course + ".json"
     cont = repo.get_contents(course_path)  # get syllabus
@@ -125,8 +145,6 @@ def weeks(course):
     syllabus = ast.literal_eval(dict_str)  # eval string to dict
     flask.session['syllabus'] = syllabus
     return flask.render_template('weeks.html', data=flask.session['syllabus']["weeks"], course=course)
-
-
 
 
 @app.route('/test')
@@ -197,5 +215,12 @@ def render_file(course, week, day, file):
     r = requests.get(cont.download_url)
     return flask.render_template("exercise.html", data=mistune.markdown(r.text), course=course, week=week, day=day,
                                  file=file)
+
+
+@app.route('/flag_item', methods=['GET', 'POST'])
+def flag_item(course, week, day):
+    save_lesson(course, week, day)
+    return flask.redirect('day')     # once function called redirects user back to page where lesson items listed
+                                     # (I think it is 'day')
 
 
